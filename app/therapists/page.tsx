@@ -48,55 +48,58 @@ const mockTherapists: Therapist[] = [
   }
 ];
 
-export default function TherapistsPage() {
+export default function TherapistListingPage() {
   const router = useRouter();
-  const [selectedSpecialization, setSelectedSpecialization] = useState<string>("all");
-  const [priceRange, setPriceRange] = useState<string>("all");
+  const [selectedSpecialization, setSelectedSpecialization] = useState<string | null>("all");
+  const [priceRange, setPriceRange] = useState<[number, number]>([50, 300]);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<string | null>(null);
 
   const specializations = ["all", "CBT", "Family Therapy", "Trauma", "Addiction"];
-  const priceRanges = [
-    { label: "All Prices", value: "all" },
-    { label: "Under $100", value: "under100" },
-    { label: "$100-$150", value: "100to150" },
-    { label: "$150-$200", value: "150to200" },
-    { label: "Over $200", value: "over200" }
-  ];
+
+  const handleBookSession = async (therapistId: string) => {
+    try {
+      setIsLoading(therapistId);
+      // Navigate to the booking confirmation page with the therapist ID
+      router.push(`/booking-confirmation?therapistId=${therapistId}`);
+    } catch (error) {
+      console.error('Error booking session:', error);
+      // You might want to show an error message to the user here
+    } finally {
+      setIsLoading(null);
+    }
+  };
 
   const filteredTherapists = mockTherapists.filter(therapist => {
-    const matchesSpecialization = selectedSpecialization === "all" ||
+    const matchesSpecialization = selectedSpecialization === "all" || selectedSpecialization === null ||
       therapist.specialization.toLowerCase().includes(selectedSpecialization.toLowerCase());
     
-    const matchesPrice = priceRange === "all" ||
-      (priceRange === "under100" && therapist.hourlyRate < 100) ||
-      (priceRange === "100to150" && therapist.hourlyRate >= 100 && therapist.hourlyRate <= 150) ||
-      (priceRange === "150to200" && therapist.hourlyRate > 150 && therapist.hourlyRate <= 200) ||
-      (priceRange === "over200" && therapist.hourlyRate > 200);
+    const matchesPrice = priceRange[0] <= therapist.hourlyRate && therapist.hourlyRate <= priceRange[1];
 
     const matchesSearch = searchQuery === "" ||
       therapist.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      therapist.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      therapist.specialization.toLowerCase().includes(searchQuery.toLowerCase());
+      therapist.specialization.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      therapist.description.toLowerCase().includes(searchQuery.toLowerCase());
 
     return matchesSpecialization && matchesPrice && matchesSearch;
   });
 
   return (
-    <main className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-[#f8f4f1] py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Find Your Therapist</h1>
+          <h1 className="text-3xl font-bold text-[#f07f06] mb-4">Find Your Therapist</h1>
           <div className="flex space-x-4">
             <Button 
               onClick={() => router.push("/therapists/register")}
-              className="text-sm py-2 px-4"
+              className="text-sm py-2 px-4 bg-[#9ac9f1] hover:bg-[#8ab8e1] text-white"
             >
               Register as Therapist
             </Button>
             <Button
               onClick={() => router.push("/bookings")}
-              className="text-sm py-2 px-4 flex items-center space-x-2"
+              className="text-sm py-2 px-4 flex items-center space-x-2 bg-[#f07f06] hover:bg-[#e06e05] text-white"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -114,13 +117,13 @@ export default function TherapistsPage() {
               placeholder="Search therapists by name, specialization, or description..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 rounded-lg border border-[#9ac9f1] focus:outline-none focus:ring-2 focus:ring-[#9ac9f1] focus:border-transparent"
             />
             <svg
               className="absolute right-3 top-2.5 h-5 w-5 text-gray-400"
               fill="none"
-              stroke="currentColor"
               viewBox="0 0 24 24"
+              stroke="currentColor"
             >
               <path
                 strokeLinecap="round"
@@ -132,79 +135,79 @@ export default function TherapistsPage() {
           </div>
         </div>
 
-        {/* Filters */}
-        <div className="mb-8 space-y-4">
-          <div>
-            <h3 className="text-sm font-medium text-gray-700 mb-2">Specialization</h3>
-            <div className="flex space-x-4 overflow-x-auto pb-2">
-              {specializations.map((spec) => (
-                <button
-                  key={spec}
-                  onClick={() => setSelectedSpecialization(spec)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap ${
-                    selectedSpecialization === spec
-                      ? "bg-blue-600 text-white"
-                      : "bg-white text-gray-700 hover:bg-gray-50"
-                  }`}
-                >
-                  {spec}
-                </button>
-              ))}
-            </div>
-          </div>
+        {/* Filter Buttons */}
+        <div className="flex flex-wrap gap-2 mb-6">
+          {specializations.map((spec) => (
+            <button
+              key={spec}
+              onClick={() => setSelectedSpecialization(spec === selectedSpecialization ? null : spec)}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                selectedSpecialization === spec
+                  ? "bg-[#f07f06] text-white"
+                  : "bg-white text-gray-700 hover:bg-[#9ac9f1] hover:text-white border border-[#9ac9f1]"
+              }`}
+            >
+              {spec}
+            </button>
+          ))}
+        </div>
 
-          <div>
-            <h3 className="text-sm font-medium text-gray-700 mb-2">Price Range</h3>
-            <div className="flex space-x-4 overflow-x-auto pb-2">
-              {priceRanges.map((range) => (
-                <button
-                  key={range.value}
-                  onClick={() => setPriceRange(range.value)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap ${
-                    priceRange === range.value
-                      ? "bg-blue-600 text-white"
-                      : "bg-white text-gray-700 hover:bg-gray-50"
-                  }`}
-                >
-                  {range.label}
-                </button>
-              ))}
-            </div>
-          </div>
+        {/* Price Range Filter */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Price Range: ${priceRange[0]} - ${priceRange[1]}
+          </label>
+          <input
+            type="range"
+            min="50"
+            max="300"
+            value={priceRange[1]}
+            onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
+            className="w-full h-2 bg-[#9ac9f1] rounded-lg appearance-none cursor-pointer"
+          />
         </div>
 
         {/* Results Count */}
-        <div className="mb-6">
-          <p className="text-gray-600">
-            Found {filteredTherapists.length} therapist{filteredTherapists.length !== 1 ? 's' : ''}
-          </p>
-        </div>
+        <p className="text-gray-600 mb-4">
+          {filteredTherapists.length} therapist{filteredTherapists.length !== 1 ? "s" : ""} found
+        </p>
 
-        {/* Therapist Grid */}
+        {/* Therapist Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredTherapists.map((therapist) => (
             <div
               key={therapist.id}
-              className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+              className="bg-white rounded-xl shadow-md overflow-hidden border border-[#9ac9f1] hover:shadow-lg transition-shadow"
             >
-              <div className="aspect-w-16 aspect-h-9">
+              <div className="relative h-48 w-full">
                 <img
                   src={therapist.imageUrl}
                   alt={therapist.name}
-                  className="object-cover w-full h-48"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = "https://via.placeholder.com/300x200?text=Therapist+Image";
+                  }}
                 />
               </div>
               <div className="p-6">
-                <div className="flex justify-between items-start mb-2">
-                  <h2 className="text-xl font-semibold text-gray-900">{therapist.name}</h2>
-                  <span className="text-yellow-400">★ {therapist.rating}</span>
-                </div>
-                <p className="text-sm text-blue-600 font-medium mb-2">{therapist.specialization}</p>
-                <p className="text-gray-600 text-sm mb-4 line-clamp-3">{therapist.description}</p>
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">{therapist.name}</h2>
+                <p className="text-[#f07f06] font-medium mb-2">{therapist.specialization}</p>
+                <p className="text-gray-600 mb-4">{therapist.description}</p>
                 <div className="flex justify-between items-center">
-                  <span className="text-lg font-semibold text-gray-900">${therapist.hourlyRate}/hr</span>
-                  <Button onClick={() => router.push(`/therapists/${therapist.id}/book`)}>
-                    Book Session
+                  <span className="text-lg font-semibold text-[#f07f06]">
+                    ${therapist.hourlyRate}/hour
+                  </span>
+                  <Button
+                    onClick={() => handleBookSession(therapist.id)}
+                    disabled={isLoading === therapist.id}
+                    className={`${
+                      isLoading === therapist.id
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-[#9ac9f1] hover:bg-[#8ab8e1]"
+                    } text-white`}
+                  >
+                    {isLoading === therapist.id ? "Booking..." : "Book Session"}
                   </Button>
                 </div>
               </div>
@@ -216,16 +219,6 @@ export default function TherapistsPage() {
         {filteredTherapists.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500 text-lg">No therapists found matching your criteria.</p>
-            <Button
-              onClick={() => {
-                setSelectedSpecialization("all");
-                setPriceRange("all");
-                setSearchQuery("");
-              }}
-              className="mt-4"
-            >
-              Clear Filters
-            </Button>
           </div>
         )}
       </div>

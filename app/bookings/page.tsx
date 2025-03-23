@@ -87,21 +87,21 @@ export default function BookingsPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-[#f8f4f1] py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="bg-white rounded-xl shadow-lg p-8">
+        <div className="bg-white rounded-xl shadow-lg p-8 border border-[#9ac9f1]">
           <div className="flex items-center mb-8">
             <Button
               variant="secondary"
               onClick={() => router.back()}
-              className="mr-4 flex items-center"
+              className="mr-4 flex items-center bg-[#9ac9f1] hover:bg-[#8ab8e1] text-white"
             >
               <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
               Back
             </Button>
-            <h1 className="text-3xl font-bold text-gray-900">My Bookings</h1>
+            <h1 className="text-3xl font-bold text-[#f07f06]">My Bookings</h1>
           </div>
 
           <div className="flex justify-end mb-6">
@@ -109,24 +109,44 @@ export default function BookingsPage() {
               <Button
                 variant={filter === "all" ? "primary" : "secondary"}
                 onClick={() => setFilter("all")}
+                className={`${
+                  filter === "all" 
+                    ? "bg-[#f07f06] hover:bg-[#e06e05] text-white" 
+                    : "bg-[#9ac9f1] hover:bg-[#8ab8e1] text-white"
+                }`}
               >
                 All
               </Button>
               <Button
                 variant={filter === "scheduled" ? "primary" : "secondary"}
                 onClick={() => setFilter("scheduled")}
+                className={`${
+                  filter === "scheduled" 
+                    ? "bg-[#f07f06] hover:bg-[#e06e05] text-white" 
+                    : "bg-[#9ac9f1] hover:bg-[#8ab8e1] text-white"
+                }`}
               >
                 Scheduled
               </Button>
               <Button
                 variant={filter === "completed" ? "primary" : "secondary"}
                 onClick={() => setFilter("completed")}
+                className={`${
+                  filter === "completed" 
+                    ? "bg-[#f07f06] hover:bg-[#e06e05] text-white" 
+                    : "bg-[#9ac9f1] hover:bg-[#8ab8e1] text-white"
+                }`}
               >
                 Completed
               </Button>
               <Button
                 variant={filter === "cancelled" ? "primary" : "secondary"}
                 onClick={() => setFilter("cancelled")}
+                className={`${
+                  filter === "cancelled" 
+                    ? "bg-[#f07f06] hover:bg-[#e06e05] text-white" 
+                    : "bg-[#9ac9f1] hover:bg-[#8ab8e1] text-white"
+                }`}
               >
                 Cancelled
               </Button>
@@ -142,20 +162,28 @@ export default function BookingsPage() {
               {filteredBookings.map((booking) => (
                 <div
                   key={booking.id}
-                  className="border rounded-lg p-6 hover:shadow-md transition-shadow"
+                  className="border border-[#9ac9f1] rounded-lg p-6 hover:shadow-md transition-shadow"
                 >
                   <div className="flex justify-between items-start">
                     <div>
                       <h2 className="text-xl font-semibold text-gray-900">
                         {booking.therapistName}
                       </h2>
-                      <p className="text-gray-600">{booking.specialization}</p>
+                      <p className="text-[#f07f06]">{booking.specialization}</p>
                     </div>
                     <div className="flex space-x-2">
-                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(booking.status)}`}>
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        booking.status === "scheduled" ? "bg-[#9ac9f1] text-white" :
+                        booking.status === "completed" ? "bg-[#f07f06] text-white" :
+                        "bg-red-100 text-red-800"
+                      }`}>
                         {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
                       </span>
-                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${getPaymentStatusColor(booking.paymentStatus)}`}>
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        booking.paymentStatus === "confirmed" ? "bg-[#f07f06] text-white" :
+                        booking.paymentStatus === "pending" ? "bg-[#9ac9f1] text-white" :
+                        "bg-red-100 text-red-800"
+                      }`}>
                         {booking.paymentStatus.charAt(0).toUpperCase() + booking.paymentStatus.slice(1)}
                       </span>
                     </div>
@@ -176,7 +204,7 @@ export default function BookingsPage() {
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">Amount</p>
-                      <p className="font-medium">${booking.amount}</p>
+                      <p className="font-medium text-[#f07f06]">${booking.amount}</p>
                     </div>
                   </div>
 
@@ -188,6 +216,7 @@ export default function BookingsPage() {
                           // Handle cancellation
                           console.log("Cancel booking:", booking.id);
                         }}
+                        className="bg-[#9ac9f1] hover:bg-[#8ab8e1] text-white"
                       >
                         Cancel Session
                       </Button>
@@ -196,6 +225,7 @@ export default function BookingsPage() {
                           // Handle joining session
                           console.log("Join session:", booking.id);
                         }}
+                        className="bg-[#f07f06] hover:bg-[#e06e05] text-white"
                       >
                         Join Session
                       </Button>
