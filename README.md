@@ -2,6 +2,8 @@
 
 A decentralized therapy platform built with Next.js, WorldCoin, and Solidity smart contracts. This platform connects patients with therapists, facilitates secure payments, and manages therapy sessions through blockchain technology.
 
+SmartContract deployed Worlcoin Sepolia Testnet : https://worldchain-sepolia.explorer.alchemy.com/address/0x981550B11a9dbbAaC08Ab81DBE68a86097Ea57Bc?tab=contract
+
 ## Features
 
 ### For Patients
