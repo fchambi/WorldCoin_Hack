@@ -19,9 +19,14 @@ type User = {
     profilePictureUrl: string | null;
 };
 
-export const Login = () => {
+interface LoginProps {
+    onLoginSuccess?: () => void;
+}
+
+export const Login = ({ onLoginSuccess }: LoginProps) => {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(false);
+    const [isVerified, setIsVerified] = useState(false);
     
     const refreshUserData = useCallback(async () => {
         try {
@@ -30,6 +35,7 @@ export const Login = () => {
                 const data = await response.json();
                 if (data.user) {
                     setUser(data.user);
+                    setIsVerified(true);
                 }
             }
         } catch (error) {
@@ -65,7 +71,8 @@ export const Login = () => {
                 });
 
                 if (response.status === 200) {
-                    setUser(MiniKit.user)
+                    setUser(MiniKit.user);
+                    setIsVerified(true);
                 }
                 setLoading(false);
             }
@@ -82,13 +89,18 @@ export const Login = () => {
             });
             
             setUser(null);
+            setIsVerified(false);
         } catch (error) {
             console.error("Logout error:", error);
         }
     };
 
+    const handleEnter = () => {
+        onLoginSuccess?.();
+    };
+
     return (
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center space-y-6">
             {!user ? (
                 <Button 
                     onClick={handleLogin} 
@@ -97,7 +109,7 @@ export const Login = () => {
                     {loading ? "Connecting..." : "Login"}
                 </Button>
             ) : (
-                <div className="flex flex-col items-center space-y-2">
+                <div className="flex flex-col items-center space-y-4">
                     <div className="text-green-600 font-medium">✓ Connected</div>
                     <div className="flex items-center space-x-2">
                         {user?.profilePictureUrl && (
@@ -111,6 +123,21 @@ export const Login = () => {
                             {user?.username || user?.walletAddress.slice(0, 6) + '...' + user?.walletAddress.slice(-4)}
                         </span>
                     </div>
+                    
+                    {isVerified && (
+                        <div className="flex flex-col items-center space-y-4">
+                            <div className="text-sm text-gray-600 text-center">
+                                Your account has been verified. Click below to enter the platform.
+                            </div>
+                            <Button
+                                onClick={handleEnter}
+                                className="bg-blue-600 hover:bg-blue-700"
+                            >
+                                Enter Platform
+                            </Button>
+                        </div>
+                    )}
+
                     <Button
                         onClick={handleLogout}
                         variant="secondary"

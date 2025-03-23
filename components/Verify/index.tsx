@@ -21,7 +21,11 @@ const verifyPayload: VerifyCommandInput = {
   verification_level: VerificationLevel.Orb, // Orb | Device
 };
 
-export const VerifyBlock = () => {
+interface VerifyBlockProps {
+  onVerificationSuccess?: () => void;
+}
+
+export const VerifyBlock = ({ onVerificationSuccess }: VerifyBlockProps) => {
   const [handleVerifyResponse, setHandleVerifyResponse] = useState<
     MiniAppVerifyActionErrorPayload | IVerifyResponse | null
   >(null);
@@ -57,18 +61,18 @@ export const VerifyBlock = () => {
       }),
     });
 
-    // TODO: Handle Success!
     const verifyResponseJson = await verifyResponse.json();
 
     if (verifyResponseJson.status === 200) {
       console.log("Verification success!");
       console.log(finalPayload);
       setVerified(true);
+      onVerificationSuccess?.();
     }
 
     setHandleVerifyResponse(verifyResponseJson);
     return verifyResponseJson;
-  }, []);
+  }, [onVerificationSuccess]);
 
   return (
     <div className="flex flex-col items-center">
